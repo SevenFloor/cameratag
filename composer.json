@@ -1,0 +1,25 @@
+{
+  "name": "sevenfloor/cameratag",
+  "description": "CameraTag API client (https://cameratag.com)",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "support": {
+    "issues": "https://github.com/sevenfloor/cameratag/issues",
+    "source": "https://github.com/sevenfloor/cameratag"
+  },
+  "authors": [
+    {
+      "name": "Nikita Ignatenkov",
+      "email": "ignatenkov.n@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.5.0",
+    "guzzlehttp/guzzle": "6.2.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "cameratag\\": "src/"
+    }
+  }
+}
