@@ -67,7 +67,7 @@ class Client
         $url = $this->baseUrl . '/' . $this->version . '/apps/' . $app_uuid . '/assets.json?api_key=' . $this->token;
         $response = $this->query($url);
         $result = [];
-        foreach ($response as $item) {
+        foreach ($response['assets'] as $item) {
             $result[] = $this->populate(new VideoObject(), $item);
         }
         return $result;
