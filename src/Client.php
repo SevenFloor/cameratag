@@ -25,6 +25,11 @@ class Client
     const METHOD_POST = 'POST';
 
     /**
+     *
+     */
+    const METHOD_PUT = 'PUT';
+
+    /**
      * @var string
      */
     protected $baseUrl = 'https://cameratag.com/api';
@@ -88,10 +93,12 @@ class Client
      * PUT https://cameratag.com/api/v11/assets/[YOUR_ASSET_UUID].json
      * @param $asset_uuid
      * @param array $params
+     * @return array
      */
     public function updateAsset($asset_uuid, array $params)
     {
-        // implement logic
+        $url = $this->baseUrl . '/' . $this->version . '/assets/' . $asset_uuid . '.json?api_key=' . $this->token;
+        return $this->query($url, $params, self::METHOD_PUT);
     }
 
     /**
@@ -186,5 +193,67 @@ class Client
         return $value;
     }
 
+    /**
+     * Requests CURL.
+     *
+     * @param string $url
+     * @param array $postFields
+     * @param string $method
+     *
+     * @return array|false
+     */
+    protected function curl($url, $postFields, $method = self::METHOD_POST)
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, $method == self::METHOD_POST);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
+        $result = json_decode($result, true);
+        curl_close($ch);
+
+        return $result;
+    }
+
+    /**
+     * GET https://cameratag.com/api/v11/apps/[YOUR_APP_UUID]/assets.json
+     * @param $app_uuid
+     * @param $filePath
+     * @return array
+     */
+    public function uploadAsset($app_uuid, $filePath, $type, $metadata = [])
+    {
+        $url = $this->baseUrl . '/' . $this->version . '/apps/' . $app_uuid . '/' . $type;
+
+        $postFields = [
+            'api_key' => $this->token,
+            'video_file'=> curl_file_create($filePath),
+        ];
+
+        $result = $this->curl($url, $postFields);
+
+        if ($result && isset($result['state']) && $result['state'] == 'published') {
+            if (!empty($metadata)) {
+                $updateParams = [
+                    'metadata' => json_encode($metadata),
+                ];
+
+                $this->updateAsset($result['uuid'], $updateParams);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public function uploadPhoto($app_uuid, $filePath, $metadata) {
+        return $this->uploadAsset($app_uuid, $filePath, 'photos', $metadata);
+    }
+
+    public function uploadVideo($app_uuid, $filePath, $metadata) {
+        return $this->uploadAsset($app_uuid, $filePath, 'videos', $metadata);
+    }
 
 }
