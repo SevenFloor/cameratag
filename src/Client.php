@@ -67,10 +67,17 @@ class Client
      * @param $app_uuid
      * @return array
      */
-    public function listAssets($app_uuid)
+    public function listAssets($app_uuid, $page = null)
     {
         $url = $this->baseUrl . '/' . $this->version . '/apps/' . $app_uuid . '/assets.json?api_key=' . $this->token;
-        $response = $this->query($url);
+
+        $params = [];
+
+        if ($page != null) {
+            $params['page'] = $page;
+        }
+
+        $response = $this->query($url, $params);
         $result = [];
         foreach ($response['assets'] as $item) {
             $result[] = $this->populate(new VideoObject(), $item);
